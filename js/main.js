@@ -60,7 +60,7 @@ var drawNode = function(t, x, y, clr){
 	c.fill()
 	c.fillStyle = "#000"
 	c.fillText(t, x - fontSize / (4 / t.toString().length || 1), y + fontSize / 4);
-	c.strokeStyle = clr || "green"
+	c.strokeStyle = clr || "#00C853"
 	c.lineWidth = 5
 	c.stroke()
 	
@@ -153,6 +153,7 @@ draw()
 var nextNode = nodeList.length + 1
 var tx = 200, ty = 200
 var addNodeProcessRunning = false
+var connectingNodes = false
 var nodeEl = undefined
 var handlePos = function(e){
 	tx = e.touches[0].clientX
@@ -170,7 +171,7 @@ $('#addNodeBtn').addEventListener('touchstart', function(e){
 	handlePos(e)
 })
 window.addEventListener('touchmove', function(e){
-	if(!addNodeProcessRunning) return
+	if(!addNodeProcessRunning || connectingNodes) return
 	handlePos(e)
 })
 window.addEventListener('touchend', function(e){
@@ -185,6 +186,7 @@ window.addEventListener('touchend', function(e){
 	}else if(ty > oy + size){
 		ty = size + oy
 	}
+	connectingNodes = true
 	nodeConnectModal.classList.add('active')
 })
 
@@ -224,22 +226,23 @@ var highlightEdge = function(start, end){
 	var e = routes.find(function(route){
 		return route.indexOf(start) > -1 && route.indexOf(end) > -1
 	})
-	e[2] = "red"
+	e[2] = "#D50000"
 }
 
 var dfs = async function(start, end, visited = []){
 	visited.push(start)
-	nodeList[start - 1].clr = "orange"
+	!nodeList[start - 1].clr && (nodeList[start - 1].clr = "#FFC400")
 	var dests = list[start]
 	for(var dest of dests){
-		await delay(speed)
+		
 		if(dest == end){
 			toast("Found: " + dest)
 			highlightEdge(start, end)
-			nodeList[dest - 1].clr = "blue"
+			nodeList[dest - 1].clr = "#2979FF"
 			//return
 		}
 		if(visited.indexOf(dest) == -1){
+			await delay(speed)
 			highlightEdge(start, dest)
 			dfs(dest, end, visited)
 		}
@@ -249,21 +252,21 @@ var dfs = async function(start, end, visited = []){
 var bfs = async function(start, end){
 	var queue = [start]
 	var visited = []
-	nodeList[start - 1].clr = "orange"
+	!nodeList[start - 1].clr && (nodeList[start - 1].clr = "#FFC400")
 	while(queue.length){
 		var ap = queue.shift()
 		var dests = list[ap]
 		for(var dest of dests){
-			await delay(speed)
 			if(dest === end){
 				toast("Found: " + dest)
 				highlightEdge(ap, dest)
-				nodeList[dest - 1].clr = "blue"
+				nodeList[dest - 1].clr = "#2979FF"
 				//return
 			}
 			if(visited.indexOf(dest) == -1){
+				await delay(speed)
 				highlightEdge(ap, dest)
-				!nodeList[dest - 1].clr && (nodeList[dest - 1].clr = "orange")
+				!nodeList[dest - 1].clr && (nodeList[dest - 1].clr = "#FFC400")
 				visited.push(dest)
 				queue.push(dest)
 			}
@@ -325,6 +328,7 @@ nodeConnectModalBtn.addEventListener('click', function(){
 	container.removeChild(nodeEl)
 	nodeEl = undefined
 	addNodeProcessRunning = false
+	connectingNodes = false
 	nodeConnectModal.classList.remove('active')
 })
 
