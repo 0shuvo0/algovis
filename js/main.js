@@ -45,7 +45,7 @@ function toast(txt, cls = ""){
 	toastSpecificEl.innerHTML = txt;
 	document.body.appendChild(toastSpecificEl);
 	setTimeout(function(){
-		toastSpecificEl && document.body.removeChild(toastSpecificEl);
+		document.body.removeChild(toastSpecificEl);
 		toastSpecificEl = null;
 		toastIsVisible = false;
 	}, 3000);
@@ -186,20 +186,6 @@ window.addEventListener('touchend', function(e){
 	}else if(ty > oy + size){
 		ty = size + oy
 	}
-	if(nodeList.length < 1){
-		nodeList.push({
-			val: 1,
-			x: tx.toFixed(2) - ox,
-			y: ty.toFixed(2) - oy,
-			clr: false
-		})
-		nextNode++
-		container.removeChild(nodeEl)
-		nodeEl = undefined
-		addNodeProcessRunning = false
-		nodeConnectModal.classList.remove('active')
-		return
-	}
 	connectingNodes = true
 	nodeConnectModal.classList.add('active')
 })
@@ -240,9 +226,7 @@ var highlightEdge = function(start, end){
 	var e = routes.find(function(route){
 		return route.indexOf(start) > -1 && route.indexOf(end) > -1
 	})
-	if(e && e.length){
-		e[2] = "#D50000"
-	}
+	e[2] = "#D50000"
 }
 
 var dfs = async function(start, end, visited = []){
@@ -297,17 +281,12 @@ var setAlgo = function(e){
 
 
 $('#runBtn').addEventListener('click', function(){
-	if(nodeList.length < 2){
-		toast("You need to have at least 2 nodes to run")
-		return
-	}
 	runModal.classList.add('active')
 })
 $('#resetBtn').addEventListener('click', function(){
 	nodeList = getNodeList()
 	routes = getRoutes()
 	nextNode = nodeList.length + 1
-	speed = 500
 	addNodeProcessRunning = false
 	nodeEl = undefined
 })
@@ -393,12 +372,4 @@ runModalBtn.addEventListener('click', function(){
 		toast(e)
 	}
 	runModal.classList.remove('active')
-})
-
-
-
-$('#emptyBtn').addEventListener('click', function(){
-	nodeList = []
-	routes = []
-	nextNode = 1
 })
