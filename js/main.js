@@ -240,7 +240,9 @@ var highlightEdge = function(start, end){
 	var e = routes.find(function(route){
 		return route.indexOf(start) > -1 && route.indexOf(end) > -1
 	})
-	(e && e.length) && (e[2] = "#D50000")
+	if(e && e.length){
+		e[2] = "#D50000"
+	}
 }
 
 var dfs = async function(start, end, visited = []){
