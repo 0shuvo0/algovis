@@ -309,6 +309,7 @@ nodeConnectModalBtn.addEventListener('click', function(){
 		for(var i of indexes){
 			i = parseInt(i.trim())
 			if(i < 1 || i > nextNode - 1){
+				toast("Could not connect with node " + i)
 				continue
 			}
 			routes.push([i, nextNode, false])
