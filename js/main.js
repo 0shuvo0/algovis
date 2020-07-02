@@ -1,4 +1,4 @@
-var $ = function(el){ return document.querySelector(el) }
+var $ = function(el, p = document){ return p.querySelector(el) }
 
 var container = $('.container')
 var graph = $('.graph')
@@ -11,6 +11,46 @@ graph.width = size
 graph.height = size
 var fontSize = 20
 c.font = fontSize + "px Poppins";
+
+
+var nodeConnectModal = $('#nodeConnectModal')
+var nodeConnectModalBtn = $('.addNodeBtn')
+var nodeConnectModalErr = $('.err', nodeConnectModal)
+var nodeConnectModalInput = $('input', nodeConnectModal)
+
+var runModal = $("#runModal")
+var runModalErr = $('.err', runModal)
+var runModalBtn = $(".runBtn")
+var algoStart = $("#algoStart")
+var algoEnd = $("#algoEnd")
+
+
+
+
+var toastSpecificEl = null;
+var toastIsVisible = false;
+function toast(txt, cls = ""){
+	if(toastIsVisible){
+		document.body.removeChild(toastSpecificEl);
+		toastSpecificEl = null;
+		toastIsVisible = false;
+	}
+	toastIsVisible = true;
+	toastSpecificEl = document.createElement('div');
+	if(cls != ""){
+		toastSpecificEl.classList = "toast " + cls;
+	}else{
+		toastSpecificEl.classList = "toast";
+	}	
+	toastSpecificEl.innerHTML = txt;
+	document.body.appendChild(toastSpecificEl);
+	setTimeout(function(){
+		document.body.removeChild(toastSpecificEl);
+		toastSpecificEl = null;
+		toastIsVisible = false;
+	}, 3000);
+}
+
 
 
 var drawNode = function(t, x, y, clr){
@@ -35,75 +75,6 @@ var connectNode = function(n1, n2, clr){
 }
 
 var getNodeList = function(){
-	/*return [
-		{
-			val: 1,
-			x: size * 0.3,
-			y: size * 0.1,
-			clr: false
-		},
-		{
-			val: 2,
-			x: size * 0.4,
-			y: size * 0.05,
-			clr: false
-		},
-		{
-			val: 3,
-			x: size * 0.7,
-			y: size * 0.15,
-			clr: false
-		},
-		{
-			val: 4,
-			x: size * 0.2,
-			y: size * 0.3,
-			clr: false
-		},
-		{
-			val: 5,
-			x: size * 0.2,
-			y: size * 0.4,
-			clr: false
-		},
-		{
-			val: 6,
-			x: size * 0.55,
-			y: size * 0.2,
-			clr: false
-		},
-		{
-			val: 7,
-			x: size * 0.4,
-			y: size * 0.32,
-			clr: false
-		},
-		{
-			val: 8,
-			x: size * 0.8,
-			y: size * 0.25,
-			clr: false
-		},
-		{
-			val: 9,
-			x: size * 0.9,
-			y: size * 0.7,
-			clr: false
-		},
-		{
-			val: 10,
-			x: size * 0.7,
-			y: size * 0.45,
-			clr: false
-		},
-		{
-			val: 11,
-			x: size * 0.3,
-			y: size * 0.8,
-			clr: false
-		},
-		
-	]*/
 	return [
 		{
 			val: 1,
@@ -134,36 +105,36 @@ var getNodeList = function(){
 			x: size * 0.7,
 			y: size * 0.9,
 			clr: false
+		},
+		{
+			val: 6,
+			x: size * 0.5,
+			y: size * 0.55,
+			clr: false
 		}
 	]
 }
 var nodeList = getNodeList()
 
-/*var routes = [
-	[1, 2, false],
-	[1, 3, false],
-	[1, 4, false],
-	[2, 3, false],
-	[2, 6, false],
-	[6, 7, false],
-	[7, 4, false],
-	[4, 5, false],
-	[4, 8, false],
-	[10, 11, false],
-	[7, 10, false],
-	[10, 8, false],
-	[10, 9, false],
-	[8, 5, false],
-	[5, 9, false],
-	[6, 4, false]
-]*/
-var routes = [
-	[1, 4, false],
-	[4, 3, false],
-	[2, 5, false],
-	[2, 3, false],
-	[5, 1, false]
-]
+
+var getRoutes = function(){
+	return [
+		[1, 4, false],
+		[4, 3, false],
+		[2, 5, false],
+		[2, 3, false],
+		[5, 1, false],
+		[6, 1, false],
+		[6, 2, false],
+		[6, 3, false],
+		[6, 4, false],
+		[6, 5, false]
+		
+	]
+}
+var routes = getRoutes()
+
+
 var draw = function(){
 	c.clearRect(0, 0, size, size)
 	for(var route of routes){
@@ -185,9 +156,9 @@ var addNodeProcessRunning = false
 var nodeEl = undefined
 var handlePos = function(e){
 	tx = e.touches[0].clientX
-		ty = e.touches[0].clientY
-		nodeEl.style.left = tx + "px"
-		nodeEl.style.top = ty + "px"
+	ty = e.touches[0].clientY
+	nodeEl.style.left = tx + "px"
+	nodeEl.style.top = ty + "px"
 }
 $('#addNodeBtn').addEventListener('touchstart', function(e){
 	if(addNodeProcessRunning) return
@@ -214,25 +185,7 @@ window.addEventListener('touchend', function(e){
 	}else if(ty > oy + size){
 		ty = size + oy
 	}
-	nodeList.push({
-		val: nextNode,
-		x: tx.toFixed(2) - ox,
-		y: ty.toFixed(2) - oy,
-		clr: false
-	})
-	try{
-		var indexes = prompt("Connect with node no(s):  ")
-		indexes = (indexes && indexes.trim().toString().split(",")) || ["1"]
-		for(var i of indexes){
-			routes.push([parseInt(i.trim()), nextNode, false])
-		}
-	}catch(e){
-		alert(e)
-	}
-	nextNode++
-	container.removeChild(nodeEl)
-	nodeEl = undefined
-	addNodeProcessRunning = false
+	nodeConnectModal.classList.add('active')
 })
 
 
@@ -251,9 +204,11 @@ var addEdge = function(n1, n2){
 var init = function(){
 	list = {}
 	for(var node of nodeList){
+		node.clr = false
 		addNode(node.val)
 	}
 	for(var route of routes){
+		route[2] = false
 		addEdge(route[0], route[1])
 	}
 }
@@ -264,35 +219,151 @@ var delay = function(t){
 	})
 }
 
-var bfs = function(start, end, visited = []){
+
+var highlightEdge = function(start, end){
+	var e = routes.find(function(route){
+		return route.indexOf(start) > -1 && route.indexOf(end) > -1
+	})
+	e[2] = "red"
+}
+
+var dfs = async function(start, end, visited = []){
 	visited.push(start)
 	nodeList[start - 1].clr = "orange"
 	var dests = list[start]
 	for(var dest of dests){
+		await delay(500)
 		if(dest == end){
-				var e = routes.find(function(route){
-					return route.indexOf(start) > -1 && route.indexOf(end) > -1
-				})
-				e[2] = "red"
-				bfs(dest, end, visited)
-			return
+			toast("Found: " + dest)
+			highlightEdge(start, end)
+			nodeList[dest - 1].clr = "blue"
+			//return
 		}
 		if(visited.indexOf(dest) == -1){
-				var e = routes.find(function(route){
-					return route.indexOf(start) > -1 && route.indexOf(dest) > -1
-				})
-				e[2] = "red"
-				bfs(dest, end, visited)
+			highlightEdge(start, dest)
+			dfs(dest, end, visited)
 		}
 	}
 }
 
-var run = function(){
-	init()
-	bfs(1, 11)
+var bfs = async function(start, end){
+	var queue = [start]
+	var visited = []
+	nodeList[start - 1].clr = "orange"
+	while(queue.length){
+		var ap = queue.shift()
+		var dests = list[ap]
+		for(var dest of dests){
+			await delay(500)
+			if(dest === end){
+				toast("Found: " + dest)
+				highlightEdge(ap, dest)
+				nodeList[dest - 1].clr = "blue"
+				//return
+			}
+			if(visited.indexOf(dest) == -1){
+				highlightEdge(ap, dest)
+				!nodeList[dest - 1].clr && (nodeList[dest - 1].clr = "orange")
+				visited.push(dest)
+				queue.push(dest)
+			}
+		}
+	}
 }
-try{
-	run()
-}catch(e){
-	alert(e)
+
+var algo = "bfs"
+var setAlgo = function(e){
+	algo = e
 }
+
+
+$('#runBtn').addEventListener('click', function(){
+	runModal.classList.add('active')
+})
+$('#resetBtn').addEventListener('click', function(){
+	nodeList = getNodeList()
+	routes = getRoutes()
+	nextNode = nodeList.length + 1
+	addNodeProcessRunning = false
+	nodeEl = undefined
+})
+
+
+
+
+nodeConnectModalBtn.addEventListener('click', function(){
+	var val = nodeConnectModalInput.value
+	if(!val || !val.trim()){
+		nodeConnectModalErr.innerText = "Enter atleast one node to connect with."
+		return
+	}
+	if(!(/^[0-9 ,]+$/.test(val))){
+		nodeConnectModalErr.innerText = "Unacceptable input."
+		return
+	}
+	try{
+		indexes = val.toString().trim().split(",")
+		for(var i of indexes){
+			i = parseInt(i.trim())
+			if(i < 1 || i > nextNode - 1){
+				continue
+			}
+			routes.push([i, nextNode, false])
+		}
+	}catch(e){
+		nodeConnectModalErr.innerText = e
+	}
+	nodeList.push({
+		val: nextNode,
+		x: tx.toFixed(2) - ox,
+		y: ty.toFixed(2) - oy,
+		clr: false
+	})
+	nodeConnectModalErr.innerText = ""
+	nodeConnectModalInput.value = ""
+	nextNode++
+	container.removeChild(nodeEl)
+	nodeEl = undefined
+	addNodeProcessRunning = false
+	nodeConnectModal.classList.remove('active')
+})
+
+runModalBtn.addEventListener('click', function(){
+	var s = algoStart.value
+	var e = algoEnd.value
+	if(!s || !s.trim() || !e || !e.trim()){
+		runModalErr.innerText = "Fill in all fields"
+		return
+	}
+	try{
+		s = parseInt(s.trim())
+		e = parseInt(e.trim())
+	}catch(e){
+		runModalErr.innerText = e
+		return
+	}
+	if(s < 1 || s > nextNode - 1){
+		runModalErr.innerText = "Starting node is out of range"
+		return
+	}
+	if(e < 1 || e > nextNode - 1){
+		runModalErr.innerText = "Ending node is out of range"
+		return
+	}
+	if(s == e){
+		runModalErr.innerText = "Enter unique starting and ending node"
+		return
+	}
+	runModalErr.innerText = ""
+	try{
+		init() 
+		if(algo == "bfs"){
+			bfs(s, e)
+		}else{
+			dfs(s, e)
+		}
+	}catch(e){
+		toast(e)
+	}
+	runModal.classList.remove('active')
+})
