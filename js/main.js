@@ -45,7 +45,7 @@ function toast(txt, cls = ""){
 	toastSpecificEl.innerHTML = txt;
 	document.body.appendChild(toastSpecificEl);
 	setTimeout(function(){
-		document.body.removeChild(toastSpecificEl);
+		toastSpecificEl && document.body.removeChild(toastSpecificEl);
 		toastSpecificEl = null;
 		toastIsVisible = false;
 	}, 3000);
@@ -240,7 +240,7 @@ var highlightEdge = function(start, end){
 	var e = routes.find(function(route){
 		return route.indexOf(start) > -1 && route.indexOf(end) > -1
 	})
-	e[2] = "#D50000"
+	(e && e.length) && (e[2] = "#D50000")
 }
 
 var dfs = async function(start, end, visited = []){
