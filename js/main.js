@@ -11,7 +11,7 @@ graph.width = size
 graph.height = size
 var fontSize = 20
 c.font = fontSize + "px Poppins";
-
+var speed = 500
 
 var nodeConnectModal = $('#nodeConnectModal')
 var nodeConnectModalBtn = $('.addNodeBtn')
@@ -23,7 +23,7 @@ var runModalErr = $('.err', runModal)
 var runModalBtn = $(".runBtn")
 var algoStart = $("#algoStart")
 var algoEnd = $("#algoEnd")
-
+var speedInput = $("#speedInput")
 
 
 
@@ -45,7 +45,7 @@ function toast(txt, cls = ""){
 	toastSpecificEl.innerHTML = txt;
 	document.body.appendChild(toastSpecificEl);
 	setTimeout(function(){
-		document.body.removeChild(toastSpecificEl);
+		toastSpecificEl && document.body.removeChild(toastSpecificEl);
 		toastSpecificEl = null;
 		toastIsVisible = false;
 	}, 3000);
@@ -60,7 +60,7 @@ var drawNode = function(t, x, y, clr){
 	c.fill()
 	c.fillStyle = "#000"
 	c.fillText(t, x - fontSize / (4 / t.toString().length || 1), y + fontSize / 4);
-	c.strokeStyle = clr || "green"
+	c.strokeStyle = clr || "#00C853"
 	c.lineWidth = 5
 	c.stroke()
 	
@@ -153,6 +153,7 @@ draw()
 var nextNode = nodeList.length + 1
 var tx = 200, ty = 200
 var addNodeProcessRunning = false
+var connectingNodes = false
 var nodeEl = undefined
 var handlePos = function(e){
 	tx = e.touches[0].clientX
@@ -170,7 +171,7 @@ $('#addNodeBtn').addEventListener('touchstart', function(e){
 	handlePos(e)
 })
 window.addEventListener('touchmove', function(e){
-	if(!addNodeProcessRunning) return
+	if(!addNodeProcessRunning || connectingNodes) return
 	handlePos(e)
 })
 window.addEventListener('touchend', function(e){
@@ -185,6 +186,21 @@ window.addEventListener('touchend', function(e){
 	}else if(ty > oy + size){
 		ty = size + oy
 	}
+	if(nodeList.length < 1){
+		nodeList.push({
+			val: 1,
+			x: tx.toFixed(2) - ox,
+			y: ty.toFixed(2) - oy,
+			clr: false
+		})
+		nextNode++
+		container.removeChild(nodeEl)
+		nodeEl = undefined
+		addNodeProcessRunning = false
+		nodeConnectModal.classList.remove('active')
+		return
+	}
+	connectingNodes = true
 	nodeConnectModal.classList.add('active')
 })
 
@@ -224,22 +240,25 @@ var highlightEdge = function(start, end){
 	var e = routes.find(function(route){
 		return route.indexOf(start) > -1 && route.indexOf(end) > -1
 	})
-	e[2] = "red"
+	if(e && e.length){
+		e[2] = "#D50000"
+	}
 }
 
 var dfs = async function(start, end, visited = []){
 	visited.push(start)
-	nodeList[start - 1].clr = "orange"
+	!nodeList[start - 1].clr && (nodeList[start - 1].clr = "#FFC400")
 	var dests = list[start]
 	for(var dest of dests){
-		await delay(500)
+		
 		if(dest == end){
 			toast("Found: " + dest)
 			highlightEdge(start, end)
-			nodeList[dest - 1].clr = "blue"
+			nodeList[dest - 1].clr = "#2979FF"
 			//return
 		}
 		if(visited.indexOf(dest) == -1){
+			await delay(speed)
 			highlightEdge(start, dest)
 			dfs(dest, end, visited)
 		}
@@ -249,21 +268,21 @@ var dfs = async function(start, end, visited = []){
 var bfs = async function(start, end){
 	var queue = [start]
 	var visited = []
-	nodeList[start - 1].clr = "orange"
+	!nodeList[start - 1].clr && (nodeList[start - 1].clr = "#FFC400")
 	while(queue.length){
 		var ap = queue.shift()
 		var dests = list[ap]
 		for(var dest of dests){
-			await delay(500)
 			if(dest === end){
 				toast("Found: " + dest)
 				highlightEdge(ap, dest)
-				nodeList[dest - 1].clr = "blue"
+				nodeList[dest - 1].clr = "#2979FF"
 				//return
 			}
 			if(visited.indexOf(dest) == -1){
+				await delay(speed)
 				highlightEdge(ap, dest)
-				!nodeList[dest - 1].clr && (nodeList[dest - 1].clr = "orange")
+				!nodeList[dest - 1].clr && (nodeList[dest - 1].clr = "#FFC400")
 				visited.push(dest)
 				queue.push(dest)
 			}
@@ -278,12 +297,17 @@ var setAlgo = function(e){
 
 
 $('#runBtn').addEventListener('click', function(){
+	if(nodeList.length < 2){
+		toast("You need to have at least 2 nodes to run")
+		return
+	}
 	runModal.classList.add('active')
 })
 $('#resetBtn').addEventListener('click', function(){
 	nodeList = getNodeList()
 	routes = getRoutes()
 	nextNode = nodeList.length + 1
+	speed = 500
 	addNodeProcessRunning = false
 	nodeEl = undefined
 })
@@ -306,6 +330,7 @@ nodeConnectModalBtn.addEventListener('click', function(){
 		for(var i of indexes){
 			i = parseInt(i.trim())
 			if(i < 1 || i > nextNode - 1){
+				toast("Could not connect with node " + i)
 				continue
 			}
 			routes.push([i, nextNode, false])
@@ -325,6 +350,7 @@ nodeConnectModalBtn.addEventListener('click', function(){
 	container.removeChild(nodeEl)
 	nodeEl = undefined
 	addNodeProcessRunning = false
+	connectingNodes = false
 	nodeConnectModal.classList.remove('active')
 })
 
@@ -356,6 +382,7 @@ runModalBtn.addEventListener('click', function(){
 	}
 	runModalErr.innerText = ""
 	try{
+		speed = parseInt(speedInput.value)
 		init() 
 		if(algo == "bfs"){
 			bfs(s, e)
@@ -366,4 +393,12 @@ runModalBtn.addEventListener('click', function(){
 		toast(e)
 	}
 	runModal.classList.remove('active')
+})
+
+
+
+$('#emptyBtn').addEventListener('click', function(){
+	nodeList = []
+	routes = []
+	nextNode = 1
 })
