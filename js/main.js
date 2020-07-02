@@ -35,7 +35,7 @@ var connectNode = function(n1, n2, clr){
 }
 
 var getNodeList = function(){
-	return [
+	/*return [
 		{
 			val: 1,
 			x: size * 0.3,
@@ -103,11 +103,43 @@ var getNodeList = function(){
 			clr: false
 		},
 		
+	]*/
+	return [
+		{
+			val: 1,
+			x: size * 0.5,
+			y: size * 0.1,
+			clr: false
+		},
+		{
+			val: 2,
+			x: size * 0.1,
+			y: size * 0.4,
+			clr: false
+		},
+		{
+			val: 3,
+			x: size * 0.9,
+			y: size * 0.4,
+			clr: false
+		},
+		{
+			val: 4,
+			x: size * 0.3,
+			y: size * 0.9,
+			clr: false
+		},
+		{
+			val: 5,
+			x: size * 0.7,
+			y: size * 0.9,
+			clr: false
+		}
 	]
 }
 var nodeList = getNodeList()
 
-var routes = [
+/*var routes = [
 	[1, 2, false],
 	[1, 3, false],
 	[1, 4, false],
@@ -124,6 +156,13 @@ var routes = [
 	[8, 5, false],
 	[5, 9, false],
 	[6, 4, false]
+]*/
+var routes = [
+	[1, 4, false],
+	[4, 3, false],
+	[2, 5, false],
+	[2, 3, false],
+	[5, 1, false]
 ]
 var draw = function(){
 	c.clearRect(0, 0, size, size)
@@ -144,20 +183,24 @@ var nextNode = nodeList.length + 1
 var tx = 200, ty = 200
 var addNodeProcessRunning = false
 var nodeEl = undefined
-$('#addNodeBtn').onclick = function(){
+var handlePos = function(e){
+	tx = e.touches[0].clientX
+		ty = e.touches[0].clientY
+		nodeEl.style.left = tx + "px"
+		nodeEl.style.top = ty + "px"
+}
+$('#addNodeBtn').addEventListener('touchstart', function(e){
 	if(addNodeProcessRunning) return
 	addNodeProcessRunning = true
 	nodeEl = document.createElement('div')
 	nodeEl.classList.add('node')
 	nodeEl.innerText = nextNode
 	container.appendChild(nodeEl)
-}
+	handlePos(e)
+})
 window.addEventListener('touchmove', function(e){
 	if(!addNodeProcessRunning) return
-		tx = e.touches[0].clientX
-		ty = e.touches[0].clientY
-		nodeEl.style.left = tx + "px"
-		nodeEl.style.top = ty + "px"
+	handlePos(e)
 })
 window.addEventListener('touchend', function(e){
 	if(!addNodeProcessRunning) return
@@ -215,11 +258,16 @@ var init = function(){
 	}
 }
 
+var delay = function(t){
+	return new Promise(function(resolve, reject){
+		setTimeout(resolve, t)
+	})
+}
+
 var bfs = function(start, end, visited = []){
 	visited.push(start)
 	nodeList[start - 1].clr = "orange"
 	var dests = list[start]
-	setTimeout(function(){
 	for(var dest of dests){
 		if(dest == end){
 				var e = routes.find(function(route){
@@ -230,17 +278,13 @@ var bfs = function(start, end, visited = []){
 			return
 		}
 		if(visited.indexOf(dest) == -1){
-			//setTimeout(function(){
 				var e = routes.find(function(route){
 					return route.indexOf(start) > -1 && route.indexOf(dest) > -1
 				})
 				e[2] = "red"
 				bfs(dest, end, visited)
-			//}, 1000)
 		}
 	}
-	}, 1000)
-	return false
 }
 
 var run = function(){
