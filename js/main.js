@@ -11,7 +11,7 @@ graph.width = size
 graph.height = size
 var fontSize = 20
 c.font = fontSize + "px Poppins";
-
+var speed = 500
 
 var nodeConnectModal = $('#nodeConnectModal')
 var nodeConnectModalBtn = $('.addNodeBtn')
@@ -23,7 +23,7 @@ var runModalErr = $('.err', runModal)
 var runModalBtn = $(".runBtn")
 var algoStart = $("#algoStart")
 var algoEnd = $("#algoEnd")
-
+var speedInput = $("#speedInput")
 
 
 
@@ -232,7 +232,7 @@ var dfs = async function(start, end, visited = []){
 	nodeList[start - 1].clr = "orange"
 	var dests = list[start]
 	for(var dest of dests){
-		await delay(500)
+		await delay(speed)
 		if(dest == end){
 			toast("Found: " + dest)
 			highlightEdge(start, end)
@@ -254,7 +254,7 @@ var bfs = async function(start, end){
 		var ap = queue.shift()
 		var dests = list[ap]
 		for(var dest of dests){
-			await delay(500)
+			await delay(speed)
 			if(dest === end){
 				toast("Found: " + dest)
 				highlightEdge(ap, dest)
@@ -356,6 +356,7 @@ runModalBtn.addEventListener('click', function(){
 	}
 	runModalErr.innerText = ""
 	try{
+		speed = parseInt(speedInput.value)
 		init() 
 		if(algo == "bfs"){
 			bfs(s, e)
