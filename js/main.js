@@ -156,12 +156,12 @@ var addNodeProcessRunning = false
 var connectingNodes = false
 var nodeEl = undefined
 var handlePos = function(e){
-	tx = e.touches[0].clientX
-	ty = e.touches[0].clientY
+	tx = e.clientX
+	ty = e.clientY
 	nodeEl.style.left = tx + "px"
 	nodeEl.style.top = ty + "px"
 }
-$('#addNodeBtn').addEventListener('touchstart', function(e){
+$('#addNodeBtn').addEventListener('click', function(e){
 	if(addNodeProcessRunning) return
 	addNodeProcessRunning = true
 	nodeEl = document.createElement('div')
@@ -169,12 +169,15 @@ $('#addNodeBtn').addEventListener('touchstart', function(e){
 	nodeEl.innerText = nextNode
 	container.appendChild(nodeEl)
 	handlePos(e)
+	setTimeout(function(){
+		window.addEventListener('click', handleRelease)
+	}, 0)
 })
-window.addEventListener('touchmove', function(e){
+window.addEventListener('mousemove', function(e){
 	if(!addNodeProcessRunning || connectingNodes) return
 	handlePos(e)
 })
-window.addEventListener('touchend', function(e){
+var handleRelease = function(e){
 	if(!addNodeProcessRunning) return
 	if(tx < ox){
 		tx = ox
@@ -198,11 +201,12 @@ window.addEventListener('touchend', function(e){
 		nodeEl = undefined
 		addNodeProcessRunning = false
 		nodeConnectModal.classList.remove('active')
+		window.removeEventListener('click', handleRelease)
 		return
 	}
 	connectingNodes = true
 	nodeConnectModal.classList.add('active')
-})
+}
 
 
 
@@ -351,6 +355,7 @@ nodeConnectModalBtn.addEventListener('click', function(){
 	nodeEl = undefined
 	addNodeProcessRunning = false
 	connectingNodes = false
+	window.removeEventListener('click', handleRelease)
 	nodeConnectModal.classList.remove('active')
 })
 
