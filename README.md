@@ -1,4 +1,4 @@
-# [AlgoVis](0shuvo0.github.io/algovis/)
+# [AlgoVis](https://0shuvo0.github.io/algovis/)
 ### Algovis is a tool to visualize breadth first search and depth first search
 
 #### You can:
