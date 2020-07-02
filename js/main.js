@@ -186,6 +186,20 @@ window.addEventListener('touchend', function(e){
 	}else if(ty > oy + size){
 		ty = size + oy
 	}
+	if(nodeList.length < 1){
+		nodeList.push({
+			val: 1,
+			x: tx.toFixed(2) - ox,
+			y: ty.toFixed(2) - oy,
+			clr: false
+		})
+		nextNode++
+		container.removeChild(nodeEl)
+		nodeEl = undefined
+		addNodeProcessRunning = false
+		nodeConnectModal.classList.remove('active')
+		return
+	}
 	connectingNodes = true
 	nodeConnectModal.classList.add('active')
 })
@@ -281,12 +295,17 @@ var setAlgo = function(e){
 
 
 $('#runBtn').addEventListener('click', function(){
+	if(nodeList.length < 2){
+		toast("You need to have at least 2 nodes to run")
+		return
+	}
 	runModal.classList.add('active')
 })
 $('#resetBtn').addEventListener('click', function(){
 	nodeList = getNodeList()
 	routes = getRoutes()
 	nextNode = nodeList.length + 1
+	speed = 500
 	addNodeProcessRunning = false
 	nodeEl = undefined
 })
@@ -372,4 +391,12 @@ runModalBtn.addEventListener('click', function(){
 		toast(e)
 	}
 	runModal.classList.remove('active')
+})
+
+
+
+$('#emptyBtn').addEventListener('click', function(){
+	nodeList = []
+	routes = []
+	nextNode = 1
 })
