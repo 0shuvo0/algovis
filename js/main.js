@@ -74,8 +74,10 @@ var connectNode = function(n1, n2, clr){
 	c.stroke()
 }
 
-var getNodeList = function(){
-	return [
+
+var getGraph = function(){
+	var graphs = [
+		[
 		{
 			val: 1,
 			x: size * 0.5,
@@ -112,13 +114,102 @@ var getNodeList = function(){
 			y: size * 0.55,
 			clr: false
 		}
+		],
+		[
+		{
+			val: 1,
+			x: size * 0.5,
+			y: size * 0.1,
+			clr: false
+		},
+		{
+			val: 2,
+			x: size * 0.4,
+			y: size * 0.3,
+			clr: false
+		},
+		{
+			val: 3,
+			x: size * 0.6,
+			y: size * 0.3,
+			clr: false
+		},
+		{
+			val: 4,
+			x: size * 0.3,
+			y: size * 0.5,
+			clr: false
+		},
+		{
+			val: 5,
+			x: size * 0.5,
+			y: size * 0.5,
+			clr: false
+		},
+		{
+			val: 6,
+			x: size * 0.7,
+			y: size * 0.5,
+			clr: false
+		},
+		{
+			val: 7,
+			x: size * 0.2,
+			y: size * 0.7,
+			clr: false
+		},
+		{
+			val: 8,
+			x: size * 0.4,
+			y: size * 0.7,
+			clr: false
+		},
+		{
+			val: 9,
+			x: size * 0.6,
+			y: size * 0.7,
+			clr: false
+		},
+		{
+			val: 10,
+			x: size * 0.8,
+			y: size * 0.7,
+			clr: false
+		},
+		{
+			val: 11,
+			x: size * 0.1,
+			y: size * 0.9,
+			clr: false
+		},
+		{
+			val: 12,
+			x: size * 0.3,
+			y: size * 0.9,
+			clr: false
+		},
+		{
+			val: 13,
+			x: size * 0.5,
+			y: size * 0.9,
+			clr: false
+		},
+		{
+			val: 14,
+			x: size * 0.7,
+			y: size * 0.9,
+			clr: false
+		},
+		{
+			val: 15,
+			x: size * 0.9,
+			y: size * 0.9,
+			clr: false
+		}
+		]
 	]
-}
-var nodeList = getNodeList()
-
-
-var getRoutes = function(){
-	return [
+	var routes = [
+		[
 		[1, 4, false],
 		[4, 3, false],
 		[2, 5, false],
@@ -129,10 +220,41 @@ var getRoutes = function(){
 		[6, 3, false],
 		[6, 4, false],
 		[6, 5, false]
-		
+		],
+		[
+		[1, 2, false],
+		[1, 3, false],
+		[2, 4, false],
+		[2, 5, false],
+		[3, 5, false],
+		[3, 6, false],
+		[4, 7, false],
+		[4, 8, false],
+		[5, 8, false],
+		[5, 9, false],
+		[6, 9, false],
+		[6, 10, false],
+		[7, 11, false],
+		[7, 12, false],
+		[8, 12, false],
+		[8, 13, false],
+		[9, 13, false],
+		[9, 14, false],
+		[10, 14, false],
+		[10, 15, false]
+		]
 	]
+	var len = 2
+	var i = Math.floor(Math.random() * len)
+	return {
+		graph: graphs[i],
+		routes: routes[i]
+	}
 }
-var routes = getRoutes()
+
+var graph = getGraph()
+var nodeList = graph.graph
+var routes = graph.routes
 
 
 var draw = function(){
@@ -244,6 +366,9 @@ var highlightEdge = function(start, end){
 	var e = routes.find(function(route){
 		return route.indexOf(start) > -1 && route.indexOf(end) > -1
 	})
+	if(!e){
+		alert(0)
+	}
 	if(e && e.length){
 		e[2] = "#D50000"
 	}
@@ -308,10 +433,10 @@ $('#runBtn').addEventListener('click', function(){
 	runModal.classList.add('active')
 })
 $('#resetBtn').addEventListener('click', function(){
-	nodeList = getNodeList()
-	routes = getRoutes()
+	graph = getGraph()
+	nodeList = graph.graph
+	routes = graph.routes
 	nextNode = nodeList.length + 1
-	speed = 500
 	addNodeProcessRunning = false
 	nodeEl = undefined
 })
