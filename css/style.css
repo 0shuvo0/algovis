@@ -172,6 +172,12 @@ input::placeholder{
 .input input{
 	margin-right: 5px;
 }
+.content .info{
+	font-weight: light;
+	letter-spacing: 1px;
+	color: #1D1D1D;
+	font-size: 0.8em;
+}
 .content .footer{
 	text-align: right;
 	margin-top: 30px;

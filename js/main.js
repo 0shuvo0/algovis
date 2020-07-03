@@ -407,3 +407,19 @@ $('#emptyBtn').addEventListener('click', function(){
 	routes = []
 	nextNode = 1
 })
+
+
+
+
+
+var hintModal = $("#hintModal")
+var hintModalBtn = $(".hintClose")
+var key = "avht"
+var showHint = localStorage.getItem(key)
+if(!showHint){
+	hintModal.classList.add('active')
+	hintModalBtn.addEventListener('click', function(){
+		localStorage.setItem(key, 'showen')
+		hintModal.classList.remove('active')
+	})
+}
